@@ -26,8 +26,11 @@ def index():
 def get_attendance():
     try:
         # Get today's date
-        today = datetime.now().strftime("%Y-%m-%d")
-        attendance_file = os.path.join(ATTENDANCE_DIR, f"attendance_{today}.txt")
+        today = datetime.now().date()
+        
+        # Query the database
+        attendances = Attendance.query.filter_by(date=today).all()
+        attendance_data = [attendance.to_dict() for attendance in attendances]
         
         attendance_data = []
         if os.path.exists(attendance_file):
@@ -59,4 +62,4 @@ def get_attendance():
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=True, host='0.0.0.0', port=8000)

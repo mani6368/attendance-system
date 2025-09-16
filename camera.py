@@ -3,9 +3,8 @@ import numpy as np
 import requests
 import time
 import os
-import face_recognition
 from datetime import datetime
-import sqlite3
+from attendance_manager import AttendanceManager
 
 # Face detection configuration
 HAAR_CASCADE_FILE = 'haarcascade_frontalface_default.xml'
@@ -53,6 +52,7 @@ class ESP32Camera:
         self.attendance_marked = False
         self.person_present = False
         self.last_presence_status = False
+        self.attendance_manager = AttendanceManager()
         
         # Ensure directories exist
         os.makedirs(FACE_SAVE_DIR, exist_ok=True)
@@ -163,10 +163,20 @@ class ESP32Camera:
 
     def save_face(self, face_img):
         if face_img.size > 0:
+            # Save the face image
             face_path = os.path.join(FACE_SAVE_DIR, f"person1_{self.face_count}.jpg")
             cv2.imwrite(face_path, face_img)
             print(f"\nSaved face as {face_path}")
+            
+            # Mark attendance in database
+            self.attendance_manager.mark_attendance(
+                person_name="Person 1",
+                face_image_path=face_path,
+                status="PRESENT"
+            )
+            
             self.face_count += 1
+            print("Attendance marked in database")
 
     def log_attendance(self, is_present):
         current_date = time.strftime("%Y-%m-%d")
