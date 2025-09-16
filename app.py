@@ -1,9 +1,19 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
+from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime, date
 import os
-from datetime import datetime
-import json
+from models import db, Person, Attendance
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///attendance.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Initialize the database
+db.init_app(app)
+
+# Create tables
+with app.app_context():
+    db.create_all()
 
 ATTENDANCE_DIR = 'attendance_logs'
 FACE_SAVE_DIR = 'detected_faces'

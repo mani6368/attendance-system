@@ -3,11 +3,45 @@ import numpy as np
 import requests
 import time
 import os
+import face_recognition
+from datetime import datetime
+import sqlite3
 
 # Face detection configuration
 HAAR_CASCADE_FILE = 'haarcascade_frontalface_default.xml'
 FACE_SAVE_DIR = 'detected_faces'
 ATTENDANCE_DIR = 'attendance_logs'
+DATABASE_FILE = 'attendance.db'
+
+def update_attendance(person_id, status='present'):
+    conn = sqlite3.connect(DATABASE_FILE)
+    cursor = conn.cursor()
+    now = datetime.now()
+    today = now.date()
+    
+    # Check if attendance exists
+    cursor.execute('''
+        SELECT id FROM attendance 
+        WHERE person_id = ? AND date = ?
+    ''', (person_id, today))
+    
+    existing = cursor.fetchone()
+    
+    if existing:
+        if status == 'absent':
+            cursor.execute('''
+                UPDATE attendance 
+                SET time_out = ?, status = ? 
+                WHERE person_id = ? AND date = ?
+            ''', (now, status, person_id, today))
+    else:
+        cursor.execute('''
+            INSERT INTO attendance (person_id, date, time_in, status)
+            VALUES (?, ?, ?, ?)
+        ''', (person_id, today, now, status))
+    
+    conn.commit()
+    conn.close()
 
 class ESP32Camera:
     def __init__(self):

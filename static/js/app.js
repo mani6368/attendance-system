@@ -1,11 +1,13 @@
 function updateAttendance() {
-    fetch('/get_attendance')
-        .then(response => response.json())
-        .then(data => {
-            // Update status
-            const statusElement = document.getElementById('current-status');
-            statusElement.textContent = data.current_status;
-            statusElement.className = data.current_status === 'PRESENT' ? 'status-present' : 'status-absent';
+    Promise.all([
+        fetch('/api/attendance/today').then(res => res.json()),
+        fetch('/api/people').then(res => res.json())
+    ])
+    .then(([attendance, people]) => {
+        // Update attendance table
+        updateAttendanceTable(attendance);
+        // Update people list
+        updatePeopleList(people);
 
             // Update attendance table
             const tableBody = document.getElementById('attendance-table-body');
