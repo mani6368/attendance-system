@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="attendance-panel">
+        <h1>ESP32-CAM Attendance System</h1>
+        
+        <div>
+            <h2>Current Status: <span id="current-status">Unknown</span></h2>
+        </div>
+
+        <div>
+            <h2>Latest Detected Face</h2>
+            <div id="face-images"></div>
+        </div>
+
+        <div>
+            <h2>Today's Attendance Log</h2>
+            <table class="attendance-table">
+                <thead>
+                    <tr>
+                        <th>Person</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="attendance-table-body">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

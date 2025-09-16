@@ -1,0 +1,52 @@
+from flask import Flask, render_template, jsonify
+import os
+from datetime import datetime
+import json
+
+app = Flask(__name__)
+
+ATTENDANCE_DIR = 'attendance_logs'
+FACE_SAVE_DIR = 'detected_faces'
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/get_attendance')
+def get_attendance():
+    try:
+        # Get today's date
+        today = datetime.now().strftime("%Y-%m-%d")
+        attendance_file = os.path.join(ATTENDANCE_DIR, f"attendance_{today}.txt")
+        
+        attendance_data = []
+        if os.path.exists(attendance_file):
+            with open(attendance_file, 'r') as f:
+                for line in f:
+                    parts = line.strip().split(', ')
+                    entry = {}
+                    for part in parts:
+                        key, value = part.split(': ')
+                        entry[key.lower()] = value
+                    attendance_data.append(entry)
+        
+        # Get list of detected face images
+        face_images = []
+        if os.path.exists(FACE_SAVE_DIR):
+            face_images = [f for f in os.listdir(FACE_SAVE_DIR) if f.endswith('.jpg')]
+        
+        # Get current status
+        current_status = "ABSENT"
+        if attendance_data:
+            current_status = attendance_data[-1]['status']
+        
+        return jsonify({
+            'attendance': attendance_data,
+            'face_images': face_images,
+            'current_status': current_status
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+if __name__ == '__main__':
+    app.run(debug=True, port=5000)
